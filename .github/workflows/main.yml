@@ -1,0 +1,21 @@
+name: Build LibreTV IPA
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 30
+    steps:
+      - name: 编译并打包
+        run: |
+          set -euo pipefail
+          if [ -f LibreTV-iOS.zip ]; then unzip -q LibreTV-iOS.zip; else curl -fL "https://aka.doubaocdn.com/s/AxRIkXPjg4" -o src.zip && unzip -q src.zip; fi
+          cd LibreTV-iOS
+          xcodebuild -project LibreTV.xcodeproj -scheme LibreTV -configuration Release -sdk iphoneos -destination "generic/platform=iOS" -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+          rm -rf Payload && mkdir Payload
+          cp -R build/Build/Products/Release-iphoneos/LibreTV.app Payload/
+          zip -qry LibreTV.ipa Payload
+          ls -lh LibreTV.ipa
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LibreTV-ipa
+          path: LibreTV-iOS/LibreTV.ipa
