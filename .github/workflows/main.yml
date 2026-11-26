@@ -2,8 +2,12 @@ name: Build LibreTV IPA
 on: workflow_dispatch
 jobs:
   build:
-    runs-on: macos-14
-    timeout-minutes: 30
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, macos-15, macos-14, macos-13]
     steps:
       - name: 编译并打包
         run: |
@@ -17,5 +21,5 @@ jobs:
           ls -lh LibreTV.ipa
       - uses: actions/upload-artifact@v4
         with:
-          name: LibreTV-ipa
+          name: LibreTV-ipa-${{ matrix.os }}
           path: LibreTV-iOS/LibreTV.ipa
